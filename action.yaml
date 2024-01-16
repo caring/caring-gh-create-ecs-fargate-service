@@ -33,8 +33,10 @@ runs:
   steps:
     - name: Provision ECS Service
       shell: bash
+      env:
+        CONTAINER_PORT: ${{ inputs.containerPort }}
       run: |
-        LOAD_BALANCERS_JSON="{\"loadBalancers\": [{\"targetGroupArn\": \"${{ inputs.targetGroupArn }}\", \"containerName\": \"${{ inputs.containerName }}\", \"containerPort\": ${inputs.containerPort}}]}"
+        LOAD_BALANCERS_JSON="{\"loadBalancers\": [{\"targetGroupArn\": \"${{ inputs.targetGroupArn }}\", \"containerName\": \"${{ inputs.containerName }}\", \"containerPort\": $CONTAINER_PORT}]}"
         NETWORK_CONFIGURATION_JSON="awsvpcConfiguration={subnets=[${{ inputs.subnetIds }}],securityGroups=[${{ inputs.securityGroups }}],assignPublicIp=ENABLED}"
 
         echo "Updating ECS service..."

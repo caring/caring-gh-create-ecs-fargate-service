@@ -30,7 +30,7 @@ jobs:
 
       - name: Provision ECS Service
         id: ecs-service
-        uses: caring/gh-create-ecs-fargate-service@v1.0.0
+        uses: caring/gh-create-ecs-fargate-service@v1
         with:
           ecsServiceName: 'my_service'
           taskDefArn: 'arn:aws:ecs:us-east-1:123456789012:task-definition/my-task:1'
