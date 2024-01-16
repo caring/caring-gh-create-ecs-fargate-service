@@ -19,7 +19,28 @@ This GitHub Action provisions an Amazon ECS service. It first attempts to update
 
 ## Example Usage
 
-This action will provision an ECS service for the specified ECS cluster, associated with the provided task definition, target group, subnets, and security groups. It can be used in your workflow to ensure proper deployment and management of your ECS services.
+```yaml
+jobs:
+  provision-ecs-service:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Provision ECS Service
+        id: ecs-service
+        uses: caring/gh-create-ecs-fargate-service@v1.0.0
+        with:
+          ecsServiceName: 'my_service'
+          taskDefArn: 'arn:aws:ecs:us-east-1:123456789012:task-definition/my-task:1'
+          targetGroupArn: 'arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/my-targets/73e2d6bc24d8a067'
+          subnetIds: 'subnet-0e4a7ab5addd5b076,subnet-0a2b3c4d5e6f7g8h9'
+          securityGroups: 'sg-0e2e6b4643b14a779,sg-0a1b2c3d4e5f6g7h8'
+          ecsClusterArn: 'arn:aws:ecs:us-east-1:123456789012:cluster/my-cluster'
+          containerName: 'my_container'
+          containerPort: '8080'
+```
 
 ## License
 
