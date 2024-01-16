@@ -1,0 +1,53 @@
+name: provision-ECS-service
+description: Provision ECS Service
+author: DevOps Team
+
+inputs:
+  ecsServiceName:
+    description: 'ECS Service Name'
+    required: true
+  taskDefArn:
+    description: 'Task Definition ARN'
+    required: true
+  targetGroupArn:
+    description: 'Target Group ARN'
+    required: true
+  subnetIds:
+    description: 'Subnet IDs'
+    required: true
+  securityGroups:
+    description: 'Security Group IDs'
+    required: true
+  ecsClusterArn:
+    description: 'ECS Cluster ARN'
+    required: true
+  containerName:
+    description: 'Container Name'
+    required: true
+  containerPort:
+    description: 'Container Port'
+    required: false
+    default: '3000'
+runs:
+  using: "composite"
+  steps:
+    - name: Provision ECS Service
+      shell: bash
+      run: |
+        LOAD_BALANCERS_JSON="{\"loadBalancers\": [{\"targetGroupArn\": \"${{ inputs.targetGroupArn }}\", \"containerName\": \"${{ inputs.containerName }}\", \"containerPort\": ${inputs.containerPort}}]}"
+        NETWORK_CONFIGURATION_JSON="awsvpcConfiguration={subnets=[${{ inputs.subnetIds }}],securityGroups=[${{ inputs.securityGroups }}],assignPublicIp=ENABLED}"
+
+        echo "Updating ECS service..."
+        if aws ecs update-service --cluster ${{ inputs.ecsClusterArn }} --service ${{ inputs.ecsServiceName }} --force-new-deployment --task-definition ${{ inputs.taskDefArn }} --cli-input-json "$LOAD_BALANCERS_JSON"
+        then
+          echo "Service updated successfully"
+        else
+          echo "Failed to update service, exit code: $?"
+          echo "Creating ECS service..."
+          if aws ecs create-service --cluster ${{ inputs.ecsClusterArn }} --service-name ${{ inputs.ecsServiceName }} --desired-count "1" --task-definition ${{ inputs.taskDefArn }} --network-configuration "$NETWORK_CONFIGURATION_JSON" --launch-type "FARGATE" --cli-input-json "$LOAD_BALANCERS_JSON"
+          then
+            echo "Service created successfully"
+          else
+            echo "Failed to create service, exit code: $?"
+          fi
+        fi
